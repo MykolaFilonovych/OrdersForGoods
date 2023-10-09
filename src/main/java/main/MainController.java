@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.*;
 
@@ -31,6 +32,7 @@ public class MainController
     @RequestMapping(path = "/addGood/{name}/{brand}/{price}/{quantity}")
     public String addGood(@PathVariable String name, @PathVariable String brand, @PathVariable int price, @PathVariable int quantity)
     {
+        String messageAboutGoodsSaving;
         Good good = new Good();
         try {
             good.setName(name);
@@ -38,25 +40,26 @@ public class MainController
             good.setPrice(price);
             good.setQuantity(quantity);
             goodsService.addGood(good);
-            return ("You have just added the following good: " + name + " of brand " + brand + ", its price is "
+            messageAboutGoodsSaving = ("You have just added the following good: " + name + " of brand " + brand + ", its price is "
                     + price + ", and quantity is " + quantity + ".");
+        }
+        catch (MethodArgumentTypeMismatchException typeMismatchException)
+        {
+            messageAboutGoodsSaving = "Your good was not saved to the database, because types mismatch of method arguments occurred.";
         }
         catch (TypeMismatchException typeMismatchException)
         {
-            typeMismatchException.printStackTrace();
-            return "Your good was not saved to the database, because types mismatch of parameters occurred.";
+            messageAboutGoodsSaving = "Your good was not saved to the database, because types mismatch of parameters occurred.";
         }
         catch (NumberFormatException numberFormatException)
         {
-            numberFormatException.printStackTrace();
-            return "Your good was not saved to the database, because wrong format of numerical parameters occurred.";
+            messageAboutGoodsSaving = "Your good was not saved to the database, because wrong format of numerical parameters occurred.";
         }
         catch (Exception exception)
         {
-            System.out.println(exception.getClass());
-            exception.printStackTrace();
-            return "Your good was not saved to the database, because something went wrong...";
+            messageAboutGoodsSaving = "Your good was not saved to the database, because something went wrong...";
         }
+        return messageAboutGoodsSaving;
     }
 
     @RequestMapping(path = "/availableGoods")
